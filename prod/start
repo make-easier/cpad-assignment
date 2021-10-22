@@ -1,0 +1,5 @@
+#!/bin/sh
+
+nohup bin/mediaproxy -J-Xms1G -J-Xmx2G -Dhttp.port=9333 -Dpidfile.path=RUNNING_PID -Dlogger.file=conf/logback.xml &> logs/mp.out &
+
+echo "MP started..."

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+prod/stop
+prod/start
+
+echo "MP re-started..."

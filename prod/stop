@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [[ -f 'RUNNING_PID' ]]; then
+  kill -9 `cat RUNNING_PID`
+  rm RUNNING_PID
+  echo "MP stopped..."
+fi
