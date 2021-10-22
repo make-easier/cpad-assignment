@@ -7,9 +7,12 @@ GET           /loscars/ping                                           com.contro
 #POST          /loscars/notify                                         com.controllers.Application.sendNotification
 
 POST          /prescription                         com.controllers.Prescription.createPres
-
 GET           /prescription/:patId                  com.controllers.Prescription.fetchPres(patId: String)
-
 PUT           /prescription/:presId                 com.controllers.Prescription.updatePres(presId: String)
 
+#Appointment
 POST          /appointment                          com.controllers.Appointment.create()
+GET           /appointment/:patId/patient           com.controllers.Appointment.fetchByPatient(patId: String)
+GET           /appointment/:docId/doctor            com.controllers.Appointment.fetchByDoctors(docId: String)
+DELETE        /appointment/:aptId                   com.controllers.Appointment.cancel(aptId: String)
+PUT           /appointment/:aptId                   com.controllers.Appointment.update(aptId: String)

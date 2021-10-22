@@ -20,7 +20,6 @@ class Appointment @Inject()(concurrencyUtils: ConcurrencyUtils,
   import concurrencyUtils.ec
 
   def create() = Action.async(parse.json) { request =>
-    Logger.info(s"")
     val json = request.body
     Appointment(json).map { appointment =>
       aptManager.create(appointment) match {
@@ -34,4 +33,48 @@ class Appointment @Inject()(concurrencyUtils: ConcurrencyUtils,
       Future(BadRequest(Json.obj("status" -> "Failure", "message" -> "Invalid request body")))
     }
   }
+
+  def fetchByPatient(patId: String) = Action.async { request =>
+    val response = Json.obj("appointments" -> aptManager.fetchByPatId(patId).map(_.toJson))
+    Logger.info(s"Response of fetchByPatient for patId: $patId is \n $response")
+    Future(Ok(response))
+  }
+
+  def fetchByDoctors(docId: String) = Action.async { request =>
+    val response = Json.obj("appointments" -> aptManager.fetchByDocId(docId).map(_.toJson))
+    Logger.info(s"Response of fetchByDoctors for docId: $docId is \n $response")
+    Future(Ok(response))
+  }
+
+  def cancel(aptId: String) = Action.async { request =>
+    Logger.info(s"Going to delete appointment $aptId")
+    aptManager.fetch(aptId).map { appointment =>
+      if (aptManager.delete(aptId)) {
+        Logger.info(s"Appointment with id $aptId got deleted successfully")
+        Future(Ok(s"""{"status": "Success", "message": "Appointment Cancelled"}"""))
+      } else {
+        Logger.warn(s"Error occurred while deleting Appointment with id $aptId")
+        Future(Unauthorized(s"""{"status": "Failure", "message": "Appointment Cancellation failed"}"""))
+      }
+    }.getOrElse {
+      Logger.warn(s"There is no appointment with id $aptId, so can't be deleted")
+      Future(NotFound(Json.obj("status" -> "Failure", "message" -> "Invalid appointmentId")))
+    }
+  }
+
+  def update(aptId: String) = Action.async(parse.json) { request =>
+    aptManager.fetch(aptId).map { appointment =>
+      val updatedAppointment = appointment.getUpdatedAppointment(request.body)
+      aptManager.update(updatedAppointment) match {
+        case true => Logger.info(s"Updated Appointment is $updatedAppointment")
+          Future(Ok(Json.obj("status" -> "Success", "message" -> "Appointment updated successfully")))
+        case false => Logger.warn(s"Failed to update appointment with id: $aptId")
+          Future(InternalServerError(Json.obj("status" -> "Failure", "message" -> "Failed to update appointment")))
+      }
+    }.getOrElse {
+      Logger.warn(s"There is no appointment with id $aptId, so can't be updated")
+      Future(NotFound(Json.obj("status" -> "Failure", "message" -> "Invalid appointmentId")))
+    }
+  }
+
 }
