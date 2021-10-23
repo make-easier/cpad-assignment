@@ -47,6 +47,12 @@ object Prescription {
     }
   }
 
+  def apply(patId: String, prescribedBy: String, docId: String, presName: String, url: String): Prescription = {
+    val today = LocalDateTime.now()
+    val presId = patId+StringUtils.getAlphaNumericString(5)
+    Prescription(presId, patId, prescribedBy, docId, presName, url, today, today)
+  }
+
 }
 
 @Singleton
